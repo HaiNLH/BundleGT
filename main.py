@@ -38,7 +38,7 @@ def get_cmd():
     # experimental settings
     parser.add_argument("-g", "--gpu", default="0", type=str, help="which gpu to use")
     parser.add_argument("-d", "--dataset", default="clothing", type=str, help="which dataset to use, options: NetEase, Youshu, iFashion")
-    parser.add_argument("-m", "--model", default="CrossCBR", type=str, help="which model to use, options: CrossCBR")
+    parser.add_argument("-m", "--model", default="BundleGT", type=str, help="which model to use, options: CrossCBR")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
     parser.add_argument( "--folder", default="", type=str, help="take logs into a floder")
 
