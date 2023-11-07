@@ -37,13 +37,13 @@ def get_cmd():
     parser = argparse.ArgumentParser()
     # experimental settings
     parser.add_argument("-g", "--gpu", default="0", type=str, help="which gpu to use")
-    parser.add_argument("-d", "--dataset", default="Youshu", type=str, help="which dataset to use, options: NetEase, Youshu, iFashion")
+    parser.add_argument("-d", "--dataset", default="clothing", type=str, help="which dataset to use, options: NetEase, Youshu, iFashion")
     parser.add_argument("-m", "--model", default="CrossCBR", type=str, help="which model to use, options: CrossCBR")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
     parser.add_argument( "--folder", default="", type=str, help="take logs into a floder")
 
     # ML Basic >>>
-    parser.add_argument( "--lr", default=1e-3, type=float, help="learning rate")
+    parser.add_argument( "--lr", default=1e-4, type=float, help="learning rate")
     parser.add_argument( "--l2_reg", default=2e-6, type=float, help="L2 regularization")
     parser.add_argument( "--embedding_size", default=64, type=int, help="Embedding size")
     parser.add_argument( "--batch_size_train", default=2048, type=int, help="the size of train batch")
