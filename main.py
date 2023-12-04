@@ -214,9 +214,11 @@ def init_best_metrics(conf):
     best_metrics = {}
     best_metrics["val"] = {}
     best_metrics["test"] = {}
+
     for key in best_metrics:
         best_metrics[key]["recall"] = {}
         best_metrics[key]["ndcg"] = {}
+        best_metrics[key]["precision"] = {}
     for topk in conf['topk']:
         for key, res in best_metrics.items():
             for metric in res:
@@ -235,8 +237,8 @@ def write_log( log_path, topk, step, metrics):
     for m, val_score in val_scores.items():
         test_score = test_scores[m]
 
-    val_str = "%s, Top_%d, Val:  recall: %f, ndcg: %f" %(curr_time, topk, val_scores["recall"][topk], val_scores["ndcg"][topk])
-    test_str = "%s, Top_%d, Test: recall: %f, ndcg: %f" %(curr_time, topk, test_scores["recall"][topk], test_scores["ndcg"][topk])
+    val_str = "%s, Top_%d, Val:  recall: %f, ndcg: %f, precision: %f" %(curr_time, topk, val_scores["recall"][topk], val_scores["ndcg"][topk], val_scores["precision"][topk])
+    test_str = "%s, Top_%d, Test: recall: %f, ndcg: %f, precision: %f" %(curr_time, topk, test_scores["recall"][topk], test_scores["ndcg"][topk], test_scores["precision"][topk])
 
     log = open(log_path, "a")
     log.write("%s\n" %(val_str))
@@ -287,7 +289,7 @@ def log_metrics(conf, model, metrics, log_path, checkpoint_model_path, checkpoin
 
 def test(model, dataloader, conf):
     tmp_metrics = {}
-    for m in ["recall", "ndcg"]:
+    for m in ["recall", "ndcg",'precision']:
         tmp_metrics[m] = {}
         for topk in conf["topk"]:
             tmp_metrics[m][topk] = [0, 0]
@@ -316,21 +318,29 @@ def test(model, dataloader, conf):
 
 
 def get_metrics(metrics, grd, pred, topks):
-    tmp = {"recall": {}, "ndcg": {}}
+    tmp = {"recall": {}, "ndcg": {}, "precision:": {}}
     for topk in topks:
         _, col_indice = torch.topk(pred, topk)
         row_indice = torch.zeros_like(col_indice) + torch.arange(pred.shape[0], device=pred.device, dtype=torch.long).view(-1, 1)
         is_hit = grd[row_indice.view(-1), col_indice.view(-1)].view(-1, topk)
         tmp["recall"][topk] = get_recall(pred, grd, is_hit, topk)
         tmp["ndcg"][topk] = get_ndcg(pred, grd, is_hit, topk)
+        tmp["precision"][topk] = get_precision(pred, grd, is_hit, topk)
 
     for m, topk_res in tmp.items():
         for topk, res in topk_res.items():
             for i, x in enumerate(res):
                 metrics[m][topk][i] += x
-
     return metrics
 
+def get_precision(pred, grd, is_hit, topk):
+    epsilon = 1e-8
+    hit_cnt = is_hit.sum(dim=1)
+    pred_cnt = topk
+    #remove those test cases who don't have any positive items
+    denorm = pred.shape[0] - (pred_cnt == 0).sum().item()
+    nomina = (hit_cnt/(pred_cnt+epsilon)).sum().item()
+    return [nomina, denorm]
 
 def get_recall(pred, grd, is_hit, topk):
     epsilon = 1e-8
