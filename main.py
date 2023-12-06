@@ -336,10 +336,10 @@ def get_metrics(metrics, grd, pred, topks):
 def get_precision(pred, grd, is_hit, topk):
     epsilon = 1e-8
     hit_cnt = is_hit.sum(dim=1)
-    pred_cnt = topk
+    num_pos = grd.sum(dim=1)
     #remove those test cases who don't have any positive items
-    denorm = pred.shape[0] - (pred_cnt == 0).sum().item()
-    nomina = (hit_cnt/(pred_cnt+epsilon)).sum().item()
+    denorm = pred.shape[0] - (num_pos == 0).sum().item()
+    nomina = (hit_cnt/(topk+epsilon)).sum().item()
     return [nomina, denorm]
 
 def get_recall(pred, grd, is_hit, topk):
